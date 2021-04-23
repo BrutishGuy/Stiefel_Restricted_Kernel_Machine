@@ -25,7 +25,7 @@ parser.add_argument('--loss', type=str, default='deterministic', help='loss type
 parser.add_argument('--lr', type=float, default=2e-4, help='Input learning rate for ADAM optimizer')
 parser.add_argument('--lrg', type=float, default=1e-4, help='Input learning rate for Cayley_ADAM optimizer')
 parser.add_argument('--max_epochs', type=int, default=1000, help='Input max_epoch')
-parser.add_argument('--proc', type=str, default='cuda', help='device type: cuda or cpu')
+parser.add_argument('--proc', type=str, default='cpu', help='device type: cuda or cpu')
 parser.add_argument('--workers', type=int, default=16, help='Number of workers for dataloader')
 parser.add_argument('--shuffle', type=bool, default=True, help='shuffle dataset: True/False')
 
@@ -33,7 +33,7 @@ opt = parser.parse_args()
 # ==================================================================================================================
 
 device = torch.device(opt.proc)
-
+torch.backends.cudnn.enabled =False
 if torch.cuda.is_available():
     torch.cuda.empty_cache()
 
@@ -62,7 +62,7 @@ xtrain, ipVec_dim, nChannels = get_dataloader(args=opt)
 # plt.setp(ax, xticks=[], yticks=[])
 # plt.show()
 
-ngpus = torch.cuda.device_count()
+ngpus = 0
 
 rkm = RKM_Stiefel(ipVec_dim=ipVec_dim, args=opt, nChannels=nChannels, ngpus=ngpus).to(device)
 logging.info(rkm)

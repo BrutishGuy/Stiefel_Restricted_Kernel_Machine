@@ -31,6 +31,9 @@ def get_dataloader(args):
     elif args.dataset_name == 'dsprites':
         return get_dsprites_dataloader(args=args)
 
+    elif args.dataset_name == 'stl10':
+        return get_stl10_dataloader(args=args)
+
 
 def get_mnist_dataloader(args, path_to_data='mnist'):
     """MNIST dataloader with (28, 28) images."""
@@ -83,6 +86,24 @@ def get_cars3d_dataloader(args, path_to_data='cars3d'):
                                  shuffle=args.shuffle, pin_memory=True, num_workers=args.workers)
     _, c, x, y = next(iter(cars3d_loader))[0].size()
     return cars3d_loader, c*x*y, c
+
+def get_stl10_dataloader(args, path_to_data='stl10'):
+    """STL10 dataloader with (64, 64, 3) images."""
+
+    name = '{}/stl10_binary/'.format(path_to_data)
+    if not os.path.exists(name):
+        print('Data at the given path doesn\'t exist. Downloading now...')
+        os.system(" mkdir stl10/;"
+                  " wget -O stl10/stl10_binary.tar.gz http://ai.stanford.edu/~acoates/stl10/stl10_binary.tar.gz ;"
+                  " cd stl10/; tar xzf stl10_binary.tar.gz")
+
+    all_transforms = transforms.Compose([transforms.Resize(64), transforms.ToTensor()])
+
+    stl10_data = datasets.STL10(path_to_data, split='train', transform=all_transforms)
+    stl10_loader = DataLoader(stl10_data, batch_size=args.mb_size,
+                                 shuffle=args.shuffle, pin_memory=True, num_workers=args.workers)
+    _, c, x, y = next(iter(stl10_loader))[0].size()
+    return stl10_loader, c*x*y, c
 
 
 def get_dsprites_dataloader(args, path_to_data='dsprites'):

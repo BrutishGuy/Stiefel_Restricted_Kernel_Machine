@@ -39,8 +39,20 @@ class Net1(nn.Module):
     def forward(self, x):
         return self.main(x)
 
+class Net2(nn.Module):
+    """ Encoder - network architecture for second view of multi-view setting """
+    def __init__(self, args):
+        super(Net2, self).__init__()
+        self.args = args
+        self.fc1 = torch.nn.Linear(40, self.args.x_fdim3)
+        self.fc2 = torch.nn.Linear(self.args.x_fdim3, self.args.x_fdim4)
 
-class Net3(nn.Module):
+    def forward(self, x):
+        x = F.leaky_relu(self.fc1(x), negative_slope=0.2)
+        x = F.leaky_relu(self.fc2(x), negative_slope=0.2)
+        return x
+
+class Net3(nn.Module):0
     """ Decoder - network architecture """
     def __init__(self, nChannels, args, cnn_kwargs):
         super(Net3, self).__init__()
@@ -65,6 +77,18 @@ class Net3(nn.Module):
     def forward(self, x):
         return self.main(x)
 
+class Net4(nn.Module):
+    """ Decoder network for second view of multi-view setting """
+    def __init__(self, args):
+        super(Net4, self).__init__()
+        self.args = args
+        self.fc1 = torch.nn.Linear(self.args.x_fdim4, self.args.x_fdim3)
+        self.fc2 = torch.nn.Linear(self.args.x_fdim3, 40)
+
+    def forward(self, x):
+        x = F.leaky_relu(self.fc1(x), negative_slope=0.2)
+        x = torch.tanh(self.fc2(x))
+        return x
 
 class RKM_Stiefel(nn.Module):
     """ Defines the Stiefel RKM model and its loss functions """
@@ -77,7 +101,7 @@ class RKM_Stiefel(nn.Module):
         self.recon_loss = recon_loss
 
         # Initialize Manifold parameter (Initialized as transpose of U defined in paper)
-        self.manifold_param = nn.Parameter(nn.init.orthogonal_(torch.Tensor(self.args.h_dim, self.args.x_fdim2)))
+        self.manifold_param = nn.Parameter(nn.init.orthogonal_(torch.Tensor(self.args.h_dim, self.args.x_fdim2 + self.args.x_fdim4)))
 
         # Settings for Conv layers
         self.cnn_kwargs = dict(kernel_size=4, stride=2, padding=1)
@@ -86,8 +110,11 @@ class RKM_Stiefel(nn.Module):
         else:
             self.cnn_kwargs = self.cnn_kwargs, self.cnn_kwargs, 8
 
-        self.encoder = Net1(self.nChannels, self.args, self.cnn_kwargs)
-        self.decoder = Net3(self.nChannels, self.args, self.cnn_kwargs)
+        self.encoder_view1 = Net1(self.nChannels, self.args, self.cnn_kwargs)
+        self.decoder_view1 = Net3(self.nChannels, self.args, self.cnn_kwargs)
+
+        self.encoder_view2 = Net2(self.nChannels, self.args)
+        self.decoder_view2 = Net4(self.nChannels, self.args)
 
     def forward(self, x):
         op1 = self.encoder(x)  # features
