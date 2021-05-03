@@ -117,7 +117,7 @@ class RKM_Stiefel(nn.Module):
         self.decoder_view2 = Net4(self.nChannels, self.args)
 
     def forward(self, x):
-        op1 = self.encoder(x)  # features
+        op1 = self.encoder_view1(x)  # features
         op1 = op1 - torch.mean(op1, dim=0)  # feature centering
         C = torch.mm(op1.t(), op1)  # Covariance matrix
 

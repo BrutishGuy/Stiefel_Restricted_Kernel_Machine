@@ -97,11 +97,15 @@ def get_stl10_dataloader(args, path_to_data='stl10'):
                   " wget -O stl10/stl10_binary.tar.gz http://ai.stanford.edu/~acoates/stl10/stl10_binary.tar.gz ;"
                   " cd stl10/; tar xzf stl10_binary.tar.gz")
 
-    all_transforms = transforms.Compose([transforms.Resize(64), transforms.ToTensor()])
+    all_transforms = transforms.Compose([transforms.Resize(224), transforms.ToTensor()])
 
     stl10_data = datasets.STL10(path_to_data, split='train', transform=all_transforms)
-    stl10_loader = DataLoader(stl10_data, batch_size=args.mb_size,
-                                 shuffle=args.shuffle, pin_memory=True, num_workers=args.workers)
+    if args.proc == 'cpu':
+        stl10_loader = DataLoader(stl10_data, batch_size=args.mb_size,
+                                     shuffle=args.shuffle, pin_memory=False, num_workers=0)
+    else:
+        stl10_loader = DataLoader(stl10_data, batch_size=args.mb_size,
+                                     shuffle=args.shuffle, pin_memory=True, num_workers=args.workers)
     _, c, x, y = next(iter(stl10_loader))[0].size()
     return stl10_loader, c*x*y, c
 

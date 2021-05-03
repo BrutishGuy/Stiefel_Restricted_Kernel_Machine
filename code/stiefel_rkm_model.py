@@ -14,10 +14,13 @@ class Net1(nn.Module):
         self.args = args
 
         if self.args.use_transfer_learning:
-            self.main = models.inception_v3(pretrained=True)
-            self.num_ftrs = self.main.fc.in_features
-            self.main.fc = nn.Linear(self.num_ftrs, self.args.x_fdim1)
-            self.main = nn.Sequential
+            self.pretrained_net = fetch_pretrained_model(self.args.transfer_learning_arch)
+            self.num_ftrs = self.pretrained_net.fc.in_features
+            self.pretrained_net.fc = nn.Linear(self.num_ftrs, self.args.x_fdim1)
+            self.main = nn.Sequential(self.pretrained_net,
+                                        nn.LeakyReLU(negative_slope=0.2),
+                                        nn.Linear(self.args.x_fdim1, self.args.x_fdim2)
+                                      )
 
         else:
             self.main = nn.Sequential(
@@ -84,7 +87,7 @@ class RKM_Stiefel(nn.Module):
         if self.ipVec_dim <= 28*28*3:
             self.cnn_kwargs = self.cnn_kwargs, dict(kernel_size=3, stride=1), 5
         else:
-            self.cnn_kwargs = self.cnn_kwargs, self.cnn_kwargs, 8
+            self.cnn_kwargs = self.cnn_kwargs, self.cnn_kwargs, 28
 
         self.encoder = Net1(self.nChannels, self.args, self.cnn_kwargs)
         self.decoder = Net3(self.nChannels, self.args, self.cnn_kwargs)
@@ -100,10 +103,11 @@ class RKM_Stiefel(nn.Module):
                                             + self.args.noise_level * torch.randn((x.shape[0], self.args.h_dim)).to(self.args.proc),
                                             self.manifold_param))
             x_tilde2 = self.decoder(torch.mm(torch.mm(op1, self.manifold_param.t()), self.manifold_param))
-            f2 = self.args.c_accu * 0.5 * (
-                    self.recon_loss(x_tilde2.view(-1, self.ipVec_dim), x.view(-1, self.ipVec_dim))
-                    + self.recon_loss(x_tilde2.view(-1, self.ipVec_dim),
-                                      x_tilde1.view(-1, self.ipVec_dim))) / x.size(0)  # Recons_loss
+            temp_view2 = x.view(-1, self.ipVec_dim)
+            temp_view1 = x_tilde1.view(-1, self.ipVec_dim)
+            temp_loss1 = self.recon_loss(temp_view1,  temp_view2)
+            temp_loss2 = self.recon_loss(x_tilde2.view(-1, self.ipVec_dim), x_tilde1.view(-1, self.ipVec_dim))
+            f2 = self.args.c_accu * 0.5 * (temp_loss1 + temp_loss2) / x.size(0)  # Recons_loss
 
         elif self.args.loss == 'noisyU':
             x_tilde = self.decoder(torch.mm(torch.mm(op1, self.manifold_param.t())
@@ -133,6 +137,18 @@ def param_state(model):
 def stiefel_opti(stief_param, lrg=1e-4):
     dict_g = {'params': stief_param, 'lr': lrg, 'momentum': 0.9, 'weight_decay': 0.0005, 'stiefel': True}
     return stiefel_optimizer.AdamG([dict_g])  # CayleyAdam
+
+def calculate_conv_output(input_size, cnn_kwargs):
+    assert type(cnn_kwargs) == dict
+    for cnn_kwarg_set in cnn_kwargs:
+        return
+
+
+def fetch_pretrained_model(model_name):
+    if model_name == 'resnet152':
+        return models.resnet152(pretrained=True)
+    if model_name == 'resnet50':
+        return models.resnet50(pretrained=True)
 
 def final_compute(model, args, ct, device=torch.device('cuda')):
     """ Utility to re-compute U. Since some datasets could exceed the GPU memory limits, some intermediate
