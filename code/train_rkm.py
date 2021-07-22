@@ -5,6 +5,7 @@ import argparse
 import time
 import matplotlib.pyplot as plt
 from datetime import datetime
+import glob
 
 # Model Settings =================================================================================================
 parser = argparse.ArgumentParser(description='St-RKM Model',
@@ -34,6 +35,7 @@ parser.add_argument('--shuffle', type=bool, default=True, help='shuffle dataset:
 
 opt = parser.parse_args()
 # ==================================================================================================================
+#opt.start_from_checkpoint = False
 
 device = torch.device(opt.proc)
 torch.backends.cudnn.enabled =False
@@ -69,7 +71,12 @@ ngpus = torch.cuda.device_count()
 
 #ngpus = 0 # uncomment this value and comment the above to force cpu usage in case of unsupported CUDA version on your GPU - this is sadly the simplest solution
 if opt.start_from_checkpoint:
-  sd_mdl = torch.load('/content/gdrive/MyDrive/Computer Science/PaperWork/cp/dsprites/checkpoint.pth_20210406-2230.tar')
+  print('loading from last checkpoint... ./cp/stl10/checkpoint.pth_20210511-0742.tar')
+  list_of_files = glob.glob('./cp/' + opt.dataset_name + '/*') # * means all if need specific format then *.csv
+  print('./cp/' + opt.dataset_name + '/*')
+  print(list_of_files)
+  latest_file = max(list_of_files, key=os.path.getctime)
+  sd_mdl = torch.load('./cp/stl10/checkpoint.pth_20210511-0742.tar')
 
   rkm = RKM_Stiefel(ipVec_dim=ipVec_dim, args=opt, nChannels=nChannels, ngpus=ngpus).to(device)
   rkm.load_state_dict(sd_mdl['rkm_state_dict'])

@@ -146,9 +146,17 @@ def calculate_conv_output(input_size, cnn_kwargs):
 
 def fetch_pretrained_model(model_name):
     if model_name == 'resnet152':
-        return models.resnet152(pretrained=True)
+        # Freeze all parameters manually
+        model = models.resnet152(pretrained=True)
+        for param in model.parameters():
+            param.requires_grad = False
+        return model
     if model_name == 'resnet50':
-        return models.resnet50(pretrained=True)
+        # Freeze all parameters manually
+        model = models.resnet50(pretrained=True)
+        for param in model.parameters():
+            param.requires_grad = False
+        return model
 
 def final_compute(model, args, ct, device=torch.device('cuda')):
     """ Utility to re-compute U. Since some datasets could exceed the GPU memory limits, some intermediate
