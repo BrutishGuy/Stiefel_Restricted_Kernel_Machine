@@ -23,7 +23,7 @@ parser.add_argument('--noise_level', type=float, default=1e-3, help='Noise-level
 parser.add_argument('--loss', type=str, default='deterministic', help='loss type: deterministic/noisyU/splitloss')
 parser.add_argument('--use_transfer_learning', type=bool, default=True, help='use pretraining: True/False')
 parser.add_argument('--transfer_learning_arch', type=str, default='resnet50', help='pre-trained architecture to use: one of those available in torchvision.models, e.g.) resnet50, resnet152, inception_v3, vgg19, etc.')
-parser.add_argument('--start_from_checkpoint', type=bool, default=True, help='Start from checkpoint in case of crash or other early termination, i.e. continue training. Accepted values are True/False.')
+parser.add_argument('--start_from_checkpoint', type=bool, default=False, help='Start from checkpoint in case of crash or other early termination, i.e. continue training. Accepted values are True/False.')
 
 # Training Settings =============================
 parser.add_argument('--lr', type=float, default=2e-4, help='Input learning rate for ADAM optimizer')
@@ -38,7 +38,6 @@ opt = parser.parse_args()
 #opt.start_from_checkpoint = False
 
 device = torch.device(opt.proc)
-torch.backends.cudnn.enabled =False
 if torch.cuda.is_available():
     torch.cuda.empty_cache()
 
