@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.utils.extmath import cartesian
 from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, transforms
+import pandas as pd
 
 from utils import Resize
 
@@ -33,7 +34,18 @@ def get_dataloader(args):
 
     elif args.dataset_name == 'stl10':
         return get_stl10_dataloader(args=args)
+    elif args.dataset_name == 'imagenette':
+        return get_imagenette_dataloader(args=args)
+    
 
+def get_transfer_features(args):
+    print('Loading pre-trained features for transfer learning...')
+    if args.dataset_name == 'stl10':
+        return get_stl10_transfer_features(args=args)
+    
+def get_stl10_transfer_features(args, path_to_data='./data/'):
+    train_data = pd.read_csv(path_to_data + 'Transfer_Features__Resnet50_features_dataframe.csv').iloc[:, 1:]
+    return train_data
 
 def get_mnist_dataloader(args, path_to_data='mnist'):
     """MNIST dataloader with (28, 28) images."""
@@ -99,7 +111,7 @@ def get_stl10_dataloader(args, path_to_data='stl10'):
 
     all_transforms = transforms.Compose([transforms.Resize(224), transforms.ToTensor()])
 
-    stl10_data = datasets.STL10(path_to_data, split='train', transform=all_transforms)
+    stl10_data = datasets.STL10('stl10', split='train', transform=all_transforms, download=True)
     if args.proc == 'cpu':
         stl10_loader = DataLoader(stl10_data, batch_size=args.mb_size,
                                      shuffle=args.shuffle, pin_memory=False, num_workers=0)
@@ -109,6 +121,33 @@ def get_stl10_dataloader(args, path_to_data='stl10'):
     _, c, x, y = next(iter(stl10_loader))[0].size()
     return stl10_loader, c*x*y, c
 
+def get_imagenette_dataloader(args, path_to_data='imagenette2'):
+    """ Imagenette loader with all the transforms needed for 224 sized images"""
+    name = '{}/imagenette2/train/'.format(path_to_data)
+    if not os.path.exists(name):
+        print('Data at the given path doesn\'t exist. Downloading now...')
+        os.system(" mkdir imagenette2/;"
+                  " wget -O imagenette2/imagenette2.tar.gz https://s3.amazonaws.com/fast-ai-imageclas/imagenette2.tgz ;"
+                  " cd imagenette2/; tar xzf imagenette2.tgz")
+
+    all_transforms = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+    )])
+
+    imagenette_images = datasets.ImageFolder(path_to_data + '/imagenette2/train/', all_transforms)
+    ### PyTorch data loaders ###
+    if args.proc == 'cpu':
+        imagenette_loader = DataLoader(imagenette_images, args.mb_size, shuffle=args.shuffle, num_workers=0, pin_memory=False)
+    else:
+        imagenette_loader = DataLoader(imagenette_images, args.mb_size, shuffle=args.shuffle, num_workers=args.workers, pin_memory=True)
+    _, c, x, y = next(iter(imagenette_loader))[0].size()
+    return imagenette_loader, c*x*y, c
 
 def get_dsprites_dataloader(args, path_to_data='dsprites'):
     """DSprites dataloader (64, 64) images"""
