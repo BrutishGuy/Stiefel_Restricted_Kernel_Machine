@@ -127,7 +127,7 @@ def get_imagenette_dataloader(args, path_to_data='imagenette2'):
     if not os.path.exists(name):
         print('Data at the given path doesn\'t exist. Downloading now...')
         os.system(" mkdir imagenette2/;"
-                  " wget -O imagenette2/imagenette2.tar.gz https://s3.amazonaws.com/fast-ai-imageclas/imagenette2.tgz ;"
+                  " wget -O imagenette2/imagenette2.tgz https://s3.amazonaws.com/fast-ai-imageclas/imagenette2.tgz ;"
                   " cd imagenette2/; tar xzf imagenette2.tgz")
 
     all_transforms = transforms.Compose([
