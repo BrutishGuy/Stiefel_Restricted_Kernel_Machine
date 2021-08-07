@@ -40,10 +40,10 @@ def get_dataloader(args):
 
 def get_transfer_features(args):
     print('Loading pre-trained features for transfer learning...')
-    if args.dataset_name == 'stl10':
-        return get_stl10_transfer_features(args=args)
+    if args.dataset_name == 'imagenette':
+        return get_imagenette_transfer_features(args=args)
     
-def get_stl10_transfer_features(args, path_to_data='./data/'):
+def get_imagenette_transfer_features(args, path_to_data='./data/'):
     train_data = pd.read_csv(path_to_data + 'Transfer_Features__Resnet50_features_dataframe.csv').iloc[:, 1:]
     return train_data
 

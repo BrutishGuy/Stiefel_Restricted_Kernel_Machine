@@ -68,6 +68,7 @@ x_transfer_features = get_transfer_features(args=opt)
 # plt.show()
 
 ngpus = torch.cuda.device_count()
+opt.start_from_checkpoint = False
 
 #ngpus = 0 # uncomment this value and comment the above to force cpu usage in case of unsupported CUDA version on your GPU - this is sadly the simplest solution
 if opt.start_from_checkpoint:
