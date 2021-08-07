@@ -75,12 +75,16 @@ class RKM_Stiefel_Transfer(nn.Module):
         self.decoder = Net3(self.nChannels, self.args, self.cnn_kwargs)
 
     def forward(self, x, x_image_view):
+        print(x.shape)
+        print(x_image_view.shape)
         op1 = self.encoder(x)  # features
+        print(op1.shape)
         op1 = op1 - torch.mean(op1, dim=0)  # feature centering
         C = torch.mm(op1.t(), op1)  # Covariance matrix
 
         """ Various types of losses as described in paper """
         if self.args.loss == 'splitloss':
+            print(self.manifold_param.t().shape)
             x_tilde1 = self.decoder(torch.mm(torch.mm(op1, self.manifold_param.t())
                                             + self.args.noise_level * torch.randn((x_image_view.shape[0], self.args.h_dim)).to(self.args.proc),
                                             self.manifold_param))
