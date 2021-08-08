@@ -23,16 +23,11 @@ class ImagenetteDataset(Dataset):
         mean=[0.485, 0.456, 0.406],
         std=[0.229, 0.224, 0.225]
         )])
-    
-        self.imagenette_images = datasets.ImageFolder(path_to_data + '/imagenette2/train/', self.all_transforms)
-        
+        self.imagenette_images = datasets.ImageFolder(path_to_data + '/imagenette2/train/', self.all_transforms)  
     def __getitem__(self, index):
-        data, target = self.imagenette_images[index]
-        
-        # Your transformations here (or set it in ImageFolder class instantiation)
-        
+        data, target = self.imagenette_images[index]        
+        # Your transformations here (or set it in ImageFolder class instantiation) 
         return data, target, index
-
     def __len__(self):
         return len(self.imagenette_images)
     
