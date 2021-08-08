@@ -12,6 +12,30 @@ import pandas as pd
 from utils import Resize
 
 
+class ImagenetteDataset(Dataset):
+    def __init__(self, path_to_data):
+        self.all_transforms = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+        )])
+    
+        self.imagenette_images = datasets.ImageFolder(path_to_data + '/imagenette2/train/', self.all_transforms)
+        
+    def __getitem__(self, index):
+        data, target = self.imagenette_images[index]
+        
+        # Your transformations here (or set it in ImageFolder class instantiation)
+        
+        return data, target, index
+
+    def __len__(self):
+        return len(self.imagenette_images)
+    
 def get_dataloader(args):
     print('Loading data...')
     if args.dataset_name == 'mnist':
@@ -130,22 +154,12 @@ def get_imagenette_dataloader(args, path_to_data='imagenette2'):
                   " wget -O imagenette2/imagenette2.tgz https://s3.amazonaws.com/fast-ai-imageclas/imagenette2.tgz ;"
                   " cd imagenette2/; tar xzf imagenette2.tgz")
 
-    all_transforms = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]
-    )])
-
-    imagenette_images = datasets.ImageFolder(path_to_data + '/imagenette2/train/', all_transforms)
+    imagenette_dataset = ImagenetteDataset(path_to_data)
     ### PyTorch data loaders ###
     if args.proc == 'cpu':
-        imagenette_loader = DataLoader(imagenette_images, args.mb_size, shuffle=args.shuffle, num_workers=0, pin_memory=False)
+        imagenette_loader = DataLoader(imagenette_dataset, args.mb_size, shuffle=args.shuffle, num_workers=0, pin_memory=False)
     else:
-        imagenette_loader = DataLoader(imagenette_images, args.mb_size, shuffle=args.shuffle, num_workers=args.workers, pin_memory=True)
+        imagenette_loader = DataLoader(imagenette_dataset, args.mb_size, shuffle=args.shuffle, num_workers=args.workers, pin_memory=True)
     _, c, x, y = next(iter(imagenette_loader))[0].size()
     return imagenette_loader, c*x*y, c
 

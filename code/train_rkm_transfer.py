@@ -118,8 +118,10 @@ is_best = False
 while cost > 1e-10 and t <= opt.max_epochs:  # run epochs until convergence or cut-off
     avg_loss, avg_f1, avg_f2 = 0, 0, 0
 
-    for indices, sample_batched in enumerate(tqdm(xtrain, desc="Epoch {}/{}".format(t, opt.max_epochs))):
+    for _, sample_batched in enumerate(tqdm(xtrain, desc="Epoch {}/{}".format(t, opt.max_epochs))):
+        indices = sample_batched[2]
         sample_indices = xtrain.dataset.samples[indices]
+        print(indices)
         print(sample_indices)
         x_transfer_feature_batch = x_transfer_features[x_transfer_features.Image.isin(sample_indices)]
         x_transfer_feature_batch = torch.tensor(x_transfer_feature_batch.drop(['Image'], axis = 1).values.astype(np.float32))
