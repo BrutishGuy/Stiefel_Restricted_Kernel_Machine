@@ -5,7 +5,7 @@ import scipy.io as sio
 import h5py
 import numpy as np
 from sklearn.utils.extmath import cartesian
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, Subset
 from torchvision import datasets, transforms
 import pandas as pd
 
@@ -149,13 +149,16 @@ def get_imagenette_dataloader(args, path_to_data='imagenette2'):
         os.system(" mkdir imagenette2/;"
                   " wget -O imagenette2/imagenette2.tgz https://s3.amazonaws.com/fast-ai-imageclas/imagenette2.tgz ;"
                   " cd imagenette2/; tar xzf imagenette2.tgz")
-
+    
     imagenette_dataset = ImagenetteDataset(path_to_data)
+    np.random.seed(42)
+    subsetting_choice = np.where(np.random.choice([0, 1], size=(len(imagenette_dataset),), p=[1./10, 9./10]) == 1)
+    imagenette_dataset_subset = Subset(imagenette_dataset, subsetting_choice)
     ### PyTorch data loaders ###
     if args.proc == 'cpu':
-        imagenette_loader = DataLoader(imagenette_dataset, args.mb_size, shuffle=args.shuffle, num_workers=0, pin_memory=False)
+        imagenette_loader = DataLoader(imagenette_dataset_subset, args.mb_size, shuffle=args.shuffle, num_workers=0, pin_memory=False)
     else:
-        imagenette_loader = DataLoader(imagenette_dataset, args.mb_size, shuffle=args.shuffle, num_workers=args.workers, pin_memory=True)
+        imagenette_loader = DataLoader(imagenette_dataset_subset, args.mb_size, shuffle=args.shuffle, num_workers=args.workers, pin_memory=True)
     _, c, x, y = next(iter(imagenette_loader))[0].size()
     return imagenette_loader, c*x*y, c
 
