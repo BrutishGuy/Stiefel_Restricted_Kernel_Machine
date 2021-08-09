@@ -150,6 +150,7 @@ while cost > 1e-10 and t <= opt.max_epochs:  # run epochs until convergence or c
     }, is_best)
 
     logging.info('Epoch {}/{}, Loss: [{}], Kpca: [{}], Recon: [{}]'.format(t, opt.max_epochs, cost, avg_f1, avg_f2))
+    print('Epoch {}/{}, Loss: [{}], Kpca: [{}], Recon: [{}]'.format(t, opt.max_epochs, cost, avg_f1, avg_f2))
     Loss_stk = np.append(Loss_stk, [[cost, avg_f1, avg_f2]], axis=0)
     t += 1
 
