@@ -5,6 +5,7 @@ import scipy.io as sio
 import h5py
 import numpy as np
 from sklearn.utils.extmath import cartesian
+import torch
 from torch.utils.data import Dataset, DataLoader, Subset, SubsetRandomSampler
 from torchvision import datasets, transforms
 import pandas as pd

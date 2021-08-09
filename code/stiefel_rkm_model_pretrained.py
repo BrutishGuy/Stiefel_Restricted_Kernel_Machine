@@ -69,7 +69,7 @@ class RKM_Stiefel_Transfer(nn.Module):
         if self.ipVec_dim <= 28*28*3:
             self.cnn_kwargs = self.cnn_kwargs, dict(kernel_size=3, stride=1), 5
         else:
-            self.cnn_kwargs = self.cnn_kwargs, self.cnn_kwargs, 8
+            self.cnn_kwargs = self.cnn_kwargs, self.cnn_kwargs, 8 # change this bad boy to shift the dataset size
 
         self.encoder = Net1(self.nChannels, self.args, self.cnn_kwargs)
         self.decoder = Net3(self.nChannels, self.args, self.cnn_kwargs)
