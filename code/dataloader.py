@@ -40,6 +40,8 @@ def get_dataloader(args):
         return get_imagenette_dataloader(args=args)
     elif args.dataset_name == 'cifar10subset':
         return get_cifar10_subset_dataloader(args=args)
+    elif args.dataset_name == 'galaxyzoo':
+        return get_galaxyzoo_dataloader(args=args)
     
     
 
@@ -185,6 +187,21 @@ def get_imagenette_dataloader(args, use_sub_sample=True, path_to_data='./data/im
         imagenette_loader = DataLoader(imagenette_dataset, args.mb_size, shuffle=False, num_workers=args.workers, pin_memory=True, sampler=imagenette_dataset_subset)
     _, c, x, y = next(iter(imagenette_loader))[0].size()
     return imagenette_loader, c*x*y, c
+
+def get_galaxyzoo_dataloader(args, path_to_data='./data/'):
+    """ Galaxy Zoo loader with all the transforms needed for 128 sized images"""
+
+    galaxy_dataset = GalaxyZooDataset(path_to_data)
+    np.random.seed(42)
+
+    ### PyTorch data loaders ###
+    if args.proc == 'cpu':
+        galaxy_loader = DataLoader(galaxy_dataset, args.mb_size, shuffle=False, num_workers=0, pin_memory=False)
+    else:
+        galaxy_loader = DataLoader(galaxy_dataset, args.mb_size, shuffle=False, num_workers=args.workers, pin_memory=True)
+    _, c, x, y = next(iter(galaxy_loader))[0].size()
+    return galaxy_loader, c*x*y, c
+
 
 def get_dsprites_dataloader(args, path_to_data='dsprites'):
     """DSprites dataloader (64, 64) images"""
@@ -365,6 +382,22 @@ class ImagenetteDataset(Dataset):
         return data, target, index
     def __len__(self):
         return len(self.imagenette_images)
+
+class GalaxyZooDataset(Dataset):
+    def __init__(self, path_to_data):
+        self.all_transforms = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(128),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor()
+        ])
+        self.galaxy_images = datasets.ImageFolder(path_to_data + '/galaxy_zoo_images/training_images/', self.all_transforms)  
+    def __getitem__(self, index):
+        data, target = self.galaxy_images[index]        
+        # Your transformations here (or set it in ImageFolder class instantiation) 
+        return data, target, index
+    def __len__(self):
+        return len(self.galaxy_images)
     
 class CIFAR10Dataset(Dataset):
     def __init__(self, path_to_data):
