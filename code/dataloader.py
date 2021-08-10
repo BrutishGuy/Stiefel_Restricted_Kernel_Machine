@@ -48,13 +48,13 @@ def get_transfer_features(args):
     if args.dataset_name == 'imagenette':
         return get_imagenette_transfer_features(args=args)
     elif args.dataset_name == 'cifar10subset':
-        return get_cifar10_transfer_features(args=args)
+        return get_cifar10_subset_transfer_features(args=args)
     
 def get_imagenette_transfer_features(args, path_to_data='./data/'):
     train_data = pd.read_csv(path_to_data + 'Transfer_Features__Resnet50_features_dataframe.csv').iloc[:, 1:]
     return train_data
 
-def get_cifar10_subset_dataloader(args, path_to_data='./data/'):
+def get_cifar10_subset_transfer_features(args, path_to_data='./data/'):
     train_data = pd.read_csv(path_to_data + 'Transfer_Features_CIFAR10_Resnet50_features_dataframe.csv').iloc[:, 1:]
     return train_data
 
