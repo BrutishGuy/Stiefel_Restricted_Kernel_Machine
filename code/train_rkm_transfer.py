@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser(description='St-RKM Model',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('--dataset_name', type=str, default='mnist',
-                    help='Dataset name: mnist/fashion-mnist/svhn/dsprites/3dshapes/cars3d')
+                    help='Dataset name: mnist/fashion-mnist/svhn/dsprites/3dshapes/cars3d/cifar10/imagenette/stl10')
 parser.add_argument('--h_dim', type=int, default=10, help='Dim of latent vector')
 parser.add_argument('--capacity', type=int, default=64, help='Conv_filters of network')
 parser.add_argument('--mb_size', type=int, default=256, help='Mini-batch size')

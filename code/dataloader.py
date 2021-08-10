@@ -13,25 +13,6 @@ import pandas as pd
 from utils import Resize
 
 
-class ImagenetteDataset(Dataset):
-    def __init__(self, path_to_data):
-        self.all_transforms = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.Resize(64),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]
-        )])
-        self.imagenette_images = datasets.ImageFolder(path_to_data + '/imagenette2/train/', self.all_transforms)  
-    def __getitem__(self, index):
-        data, target = self.imagenette_images[index]        
-        # Your transformations here (or set it in ImageFolder class instantiation) 
-        return data, target, index
-    def __len__(self):
-        return len(self.imagenette_images)
     
 def get_dataloader(args):
     print('Loading data...')
@@ -57,6 +38,9 @@ def get_dataloader(args):
         return get_stl10_dataloader(args=args)
     elif args.dataset_name == 'imagenette':
         return get_imagenette_dataloader(args=args)
+    elif args.dataset_name == 'cifar10subset':
+        return get_cifar10_subset_dataloader(args=args)
+    
     
 
 def get_transfer_features(args):
@@ -120,7 +104,7 @@ def get_cars3d_dataloader(args, path_to_data='cars3d'):
     _, c, x, y = next(iter(cars3d_loader))[0].size()
     return cars3d_loader, c*x*y, c
 
-def get_stl10_dataloader(args, path_to_data='stl10'):
+def get_stl10_dataloader(args, path_to_data='./data/stl10'):
     """STL10 dataloader with (64, 64, 3) images."""
 
     name = '{}/stl10_binary/'.format(path_to_data)
@@ -142,7 +126,38 @@ def get_stl10_dataloader(args, path_to_data='stl10'):
     _, c, x, y = next(iter(stl10_loader))[0].size()
     return stl10_loader, c*x*y, c
 
-def get_imagenette_dataloader(args, path_to_data='imagenette2'):
+def get_cifar10_subset_dataloader(args, path_to_data='./data/cifar10'):
+    """ CIFAR10 loader with all the transforms needed for 64x64 sized images"""
+    cifar10_dataset = CIFAR10Dataset(path_to_data)
+    np.random.seed(42)
+    
+    dog_indices, cat_indices, bird_indices, horse_indices = [], [], [], []
+    dog_idx, cat_idx, bird_idx, horse_idx = cifar10_dataset.class_to_idx['dog'], cifar10_dataset.class_to_idx['cat'], cifar10_dataset.class_to_idx['bird'], cifar10_dataset.class_to_idx['horse']
+    
+    for i in range(len(cifar10_dataset)):
+        current_class = cifar10_dataset[i][1]
+        if current_class == dog_idx:
+          dog_indices.append(i)
+        elif current_class == cat_idx:
+          cat_indices.append(i)
+        elif current_class == bird_idx:
+          bird_indices.append(i)
+        elif current_class == horse_idx:
+          horse_indices.append(i)
+          
+    subset_indices = dog_indices + cat_indices + bird_indices + horse_indices
+    subsetting_choice = torch.randperm(subset_indices)[:4000]
+
+    cifar10_dataset_subset = SubsetRandomSampler(subsetting_choice)
+    ### PyTorch data loaders ###
+    if args.proc == 'cpu':
+        cifar_loader = DataLoader(cifar10_dataset, args.mb_size, shuffle=False, num_workers=0, pin_memory=False, sampler=cifar10_dataset_subset)
+    else:
+        cifar_loader = DataLoader(cifar10_dataset, args.mb_size, shuffle=False, num_workers=args.workers, pin_memory=True, sampler=cifar10_dataset_subset)
+    _, c, x, y = next(iter(cifar_loader))[0].size()
+    return cifar_loader, c*x*y, c
+    
+def get_imagenette_dataloader(args, use_sub_sample=True, path_to_data='./data/imagenette2'):
     """ Imagenette loader with all the transforms needed for 224 sized images"""
     name = '{}/imagenette2/train/'.format(path_to_data)
     if not os.path.exists(name):
@@ -321,3 +336,43 @@ class cars3dDataset(Dataset):
             pic.thumbnail((64, 64), PIL.Image.ANTIALIAS)
             rescaled_mesh[i, :, :, :] = np.array(pic)
         return rescaled_mesh * 1. / 255
+
+
+class ImagenetteDataset(Dataset):
+    def __init__(self, path_to_data):
+        self.all_transforms = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.Resize(64),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+        )])
+        self.imagenette_images = datasets.ImageFolder(path_to_data + '/imagenette2/train/', self.all_transforms)  
+    def __getitem__(self, index):
+        data, target = self.imagenette_images[index]        
+        # Your transformations here (or set it in ImageFolder class instantiation) 
+        return data, target, index
+    def __len__(self):
+        return len(self.imagenette_images)
+    
+class CIFAR10Dataset(Dataset):
+    def __init__(self, path_to_data):
+        self.all_transforms = transforms.Compose([
+        transforms.CenterCrop(32, padding=4),
+        #transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(
+        mean=[0.4914, 0.4822, 0.4465],
+        std=[0.2023, 0.1994, 0.2010]
+        )])
+        self.cifar_images = datasets.CIFAR10(root=path_to_data + '/cifar10/train/', train=True , download=True, ) 
+    def __getitem__(self, index):
+        data, target = self.cifar_images[index]        
+        # Your transformations here (or set it in ImageFolder class instantiation) 
+        return data, target, index
+    def __len__(self):
+        return len(self.cifar_images)
+   
