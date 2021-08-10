@@ -388,6 +388,7 @@ class GalaxyZooDataset(Dataset):
         self.all_transforms = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(128),
+        transforms.Resize(64),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor()
         ])

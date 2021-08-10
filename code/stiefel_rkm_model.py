@@ -87,7 +87,7 @@ class RKM_Stiefel(nn.Module):
             elif self.args.dataset_name == 'cifar10' or self.args.dataset_name == 'imagenette':
                 self.cnn_kwargs = self.cnn_kwargs, self.cnn_kwargs, 8 # change this bad boy to shift the dataset size, 28 for 224x224, 8 for 64x64 and 4 for 32x32
             elif self.args.dataset_name == 'galaxyzoo':
-                self.cnn_kwargs = self.cnn_kwargs, self.cnn_kwargs, 16 # change this bad boy to shift the dataset size, 28 for 224x224, 8 for 64x64 and 4 for 32x32
+                self.cnn_kwargs = self.cnn_kwargs, self.cnn_kwargs, 8 # change this bad boy to shift the dataset size, 28 for 224x224, 8 for 64x64 and 4 for 32x32
             else:
                 self.cnn_kwargs = self.cnn_kwargs, self.cnn_kwargs, 28 # change this bad boy to shift the dataset size, 28 for 224x224, 8 for 64x64 and 4 for 32x32
 
