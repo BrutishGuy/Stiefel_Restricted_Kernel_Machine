@@ -134,12 +134,12 @@ def get_stl10_dataloader(args, path_to_data='./data/stl10'):
 
 def get_cifar10_subset_dataloader(args, path_to_data='./data/cifar10'):
     """ CIFAR10 loader with all the transforms needed for 64x64 sized images"""
-    cifar10_dataset = CIFAR10Dataset(path_to_data, download=True)
+    cifar10_dataset = CIFAR10Dataset(path_to_data)
     np.random.seed(42)
     
     dog_indices, cat_indices, bird_indices, horse_indices = [], [], [], []
-    dog_idx, cat_idx, bird_idx, horse_idx = cifar10_dataset.class_to_idx['dog'], cifar10_dataset.class_to_idx['cat'], cifar10_dataset.class_to_idx['bird'], cifar10_dataset.class_to_idx['horse']
-    
+    dog_idx, cat_idx, bird_idx, horse_idx = cifar10_dataset.cifar_images.class_to_idx['dog'], cifar10_dataset.cifar_images.class_to_idx['cat'], cifar10_dataset.cifar_images.class_to_idx['bird'], cifar10_dataset.cifar_images.class_to_idx['horse']
+
     for i in range(len(cifar10_dataset)):
         current_class = cifar10_dataset[i][1]
         if current_class == dog_idx:
@@ -152,7 +152,9 @@ def get_cifar10_subset_dataloader(args, path_to_data='./data/cifar10'):
           horse_indices.append(i)
           
     subset_indices = dog_indices + cat_indices + bird_indices + horse_indices
-    subsetting_choice = torch.randperm(subset_indices)[:4000]
+    subset_indices = torch.tensor(subset_indices)
+    subsetting_choice = subset_indices[torch.randperm(len(subset_indices))[:5000]]
+
 
     cifar10_dataset_subset = SubsetRandomSampler(subsetting_choice)
     ### PyTorch data loaders ###
@@ -367,14 +369,14 @@ class ImagenetteDataset(Dataset):
 class CIFAR10Dataset(Dataset):
     def __init__(self, path_to_data):
         self.all_transforms = transforms.Compose([
-        transforms.CenterCrop(32, padding=4),
+        transforms.CenterCrop(32),
         #transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(
         mean=[0.4914, 0.4822, 0.4465],
         std=[0.2023, 0.1994, 0.2010]
         )])
-        self.cifar_images = datasets.CIFAR10(root=path_to_data + '/cifar10/train/', train=True , download=True, ) 
+        self.cifar_images = datasets.CIFAR10(root=path_to_data + '/cifar10/train/', train=True , download=True, transform=all_transforms ) 
     def __getitem__(self, index):
         data, target = self.cifar_images[index]        
         # Your transformations here (or set it in ImageFolder class instantiation) 
