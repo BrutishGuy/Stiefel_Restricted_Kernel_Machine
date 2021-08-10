@@ -134,7 +134,7 @@ def get_stl10_dataloader(args, path_to_data='./data/stl10'):
 
 def get_cifar10_subset_dataloader(args, path_to_data='./data/cifar10'):
     """ CIFAR10 loader with all the transforms needed for 64x64 sized images"""
-    cifar10_dataset = CIFAR10Dataset(path_to_data)
+    cifar10_dataset = CIFAR10Dataset(path_to_data, download=True)
     np.random.seed(42)
     
     dog_indices, cat_indices, bird_indices, horse_indices = [], [], [], []
