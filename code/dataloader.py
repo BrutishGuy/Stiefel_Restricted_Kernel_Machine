@@ -376,7 +376,7 @@ class CIFAR10Dataset(Dataset):
         mean=[0.4914, 0.4822, 0.4465],
         std=[0.2023, 0.1994, 0.2010]
         )])
-        self.cifar_images = datasets.CIFAR10(root=path_to_data + '/cifar10/train/', train=True , download=True, transform=all_transforms ) 
+        self.cifar_images = datasets.CIFAR10(root=path_to_data + '/cifar10/train/', train=True , download=True, transform=self.all_transforms ) 
     def __getitem__(self, index):
         data, target = self.cifar_images[index]        
         # Your transformations here (or set it in ImageFolder class instantiation) 
