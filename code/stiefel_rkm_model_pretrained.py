@@ -157,12 +157,12 @@ def final_compute(model, args, ct, device=torch.device('cuda')):
     
     # Compute feature-vectors
     for i, sample_batch in enumerate(tqdm(x)):
-        indices = sample_batched[2]
+        indices = sample_batch[2]
 
         x_transfer_feature_batch = x_transfer_features.iloc[indices, :]
         x_transfer_feature_batch = torch.tensor(x_transfer_feature_batch.drop(['Image'], axis = 1).values.astype(np.float32))
                 
-        torch.save({'oti': model.encoder(x_transfer_feature_batch.to(device), sample_batched[0].to(device))},
+        torch.save({'oti': model.encoder(x_transfer_feature_batch.to(device), sample_batch[0].to(device))},
                    'oti/oti{}_checkpoint.pth_{}.tar'.format(i, ct))
 
     # Load feature-vectors
