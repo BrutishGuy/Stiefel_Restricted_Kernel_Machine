@@ -391,7 +391,7 @@ class GalaxyZooDataset(Dataset):
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor()
         ])
-        self.galaxy_images = datasets.ImageFolder(path_to_data + '/galaxy_zoo_images/training_images/', self.all_transforms)  
+        self.galaxy_images = datasets.ImageFolder(path_to_data + '/galaxy_zoo_images/', self.all_transforms)  
     def __getitem__(self, index):
         data, target = self.galaxy_images[index]        
         # Your transformations here (or set it in ImageFolder class instantiation) 
