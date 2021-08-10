@@ -1,11 +1,10 @@
 import torch
 from tqdm import tqdm
 import torch.nn as nn
+import torchvision.models as models
 import stiefel_optimizer
 from dataloader import *
 from utils import Lin_View
-import torch.utils.data.DataLoader()
-import torch.functional as F
 
 class Net1(nn.Module):
     """ Encoder - network architecture """
