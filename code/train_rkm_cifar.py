@@ -24,6 +24,8 @@ parser.add_argument('--loss', type=str, default='deterministic', help='loss type
 parser.add_argument('--transfer_learning', dest='use_transfer_learning', action='store_true', help='Use pre-training')
 parser.add_argument('--no_transfer_learning', dest='use_transfer_learning', action='store_false', help='Do not use pre-training')
 
+parser.add_argument('--add_output_info', type=str, default='', help='Additional output to the file names')
+
 parser.add_argument('--transfer_learning_arch', type=str, default='resnet50', help='pre-trained architecture to use: one of those available in torchvision.models, e.g.) resnet50, resnet152, inception_v3, vgg19, etc.')
 parser.add_argument('--use_checkpoint', dest='resume_from_checkpoint', action='store_true', help='Start from checkpoint in case of crash or other early termination, i.e. continue training.')
 parser.add_argument('--no_use_checkpoint', dest='resume_from_checkpoint', action='store_false', help='Do not start from checkpoint, i.e. start from scratch.')
@@ -47,7 +49,7 @@ if torch.cuda.is_available():
     torch.cuda.empty_cache()
 
 ct = time.strftime("%Y%m%d-%H%M")
-dirs = create_dirs(name=opt.dataset_name, ct=ct)
+dirs = create_dirs(name=opt.dataset_name + opt.add_output_info, ct=ct)
 dirs.create()
 
 # noinspection PyArgumentList
@@ -155,7 +157,7 @@ logging.info('Finished Training. Lowest cost: {}'
 # ==================================================================================================================
 
 # Load Checkpoint
-sd_mdl = torch.load('cp/{}/{}'.format(opt.dataset_name, dirs.dircp))
+sd_mdl = torch.load('cp/{}/{}'.format(opt.dataset_name + add_output_info, dirs.dircp))
 rkm.load_state_dict(sd_mdl['rkm_state_dict'])
 
 h, U = final_compute(model=rkm, args=opt, ct=ct)
@@ -168,5 +170,5 @@ torch.save({'rkm': rkm,
             'optimizer2': optimizer2.state_dict(),
             'Loss_stk': Loss_stk,
             'opt': opt,
-            'h': h, 'U': U}, 'out/{}/{}'.format(opt.dataset_name, dirs.dirout))
+            'h': h, 'U': U}, 'out/{}/{}'.format(opt.dataset_name + add_output_info, dirs.dirout))
 logging.info('\nSaved File: {}'.format(dirs.dirout))
