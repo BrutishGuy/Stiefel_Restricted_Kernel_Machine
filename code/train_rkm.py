@@ -29,7 +29,7 @@ parser.add_argument('--start_from_checkpoint', type=bool, default=False, help='S
 parser.add_argument('--lr', type=float, default=2e-4, help='Input learning rate for ADAM optimizer')
 parser.add_argument('--lrg', type=float, default=1e-4, help='Input learning rate for Cayley_ADAM optimizer')
 parser.add_argument('--max_epochs', type=int, default=1000, help='Input max_epoch')
-parser.add_argument('--proc', type=str, default='gpu', help='device type: cuda or cpu')
+parser.add_argument('--proc', type=str, default='cuda', help='device type: cuda or cpu')
 parser.add_argument('--workers', type=int, default=4, help='Number of workers for dataloader')
 parser.add_argument('--shuffle', type=bool, default=True, help='shuffle dataset: True/False')
 
