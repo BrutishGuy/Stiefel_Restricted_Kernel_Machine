@@ -80,6 +80,9 @@ if opt.resume_from_checkpoint:
   latest_file = max(list_of_files, key=os.path.getctime)
   print('loading from last checkpoint: ' + str(latest_file))
 
+
+  sd_mdl = torch.load(latest_file)
+  
   rkm = RKM_Stiefel(ipVec_dim=ipVec_dim, args=opt, nChannels=nChannels, ngpus=ngpus).to(device)
   rkm.load_state_dict(sd_mdl['rkm_state_dict'])
   param_g, param_e1 = param_state(rkm)
