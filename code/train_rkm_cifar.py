@@ -157,7 +157,7 @@ logging.info('Finished Training. Lowest cost: {}'
 # ==================================================================================================================
 
 # Load Checkpoint
-sd_mdl = torch.load('cp/{}/{}'.format(opt.dataset_name + add_output_info, dirs.dircp))
+sd_mdl = torch.load('cp/{}/{}'.format(opt.dataset_name + opt.add_output_info, dirs.dircp))
 rkm.load_state_dict(sd_mdl['rkm_state_dict'])
 
 h, U = final_compute(model=rkm, args=opt, ct=ct)
@@ -170,5 +170,5 @@ torch.save({'rkm': rkm,
             'optimizer2': optimizer2.state_dict(),
             'Loss_stk': Loss_stk,
             'opt': opt,
-            'h': h, 'U': U}, 'out/{}/{}'.format(opt.dataset_name + add_output_info, dirs.dirout))
+            'h': h, 'U': U}, 'out/{}/{}'.format(opt.dataset_name + opt.add_output_info, dirs.dirout))
 logging.info('\nSaved File: {}'.format(dirs.dirout))
