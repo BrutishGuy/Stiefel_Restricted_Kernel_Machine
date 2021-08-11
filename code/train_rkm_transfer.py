@@ -21,9 +21,15 @@ parser.add_argument('--x_fdim2', type=int, default=50, help='Input x_fdim2')
 parser.add_argument('--c_accu', type=float, default=1, help='Input weight on recons_error')
 parser.add_argument('--noise_level', type=float, default=1e-3, help='Noise-level')
 parser.add_argument('--loss', type=str, default='deterministic', help='loss type: deterministic/noisyU/splitloss')
-parser.add_argument('--use_transfer_learning', type=bool, default=True, help='use pretraining: True/False')
+parser.add_argument('--transfer_learning', dest='use_transfer_learning', action='store_true', help='Use pre-training')
+parser.add_argument('--no_transfer_learning', dest='use_transfer_learning', action='store_false', help='Do not use pre-training')
+
 parser.add_argument('--transfer_learning_arch', type=str, default='resnet50', help='pre-trained architecture to use: one of those available in torchvision.models, e.g.) resnet50, resnet152, inception_v3, vgg19, etc.')
-parser.add_argument('--start_from_checkpoint', type=bool, default=False, help='Start from checkpoint in case of crash or other early termination, i.e. continue training. Accepted values are True/False.')
+parser.add_argument('--use_checkpoint', dest='resume_from_checkpoint', action='store_true', help='Start from checkpoint in case of crash or other early termination, i.e. continue training.')
+parser.add_argument('--no_use_checkpoint', dest='resume_from_checkpoint', action='store_false', help='Do not start from checkpoint, i.e. start from scratch.')
+
+parser.set_defaults(use_transfer_learning=False)
+parser.set_defaults(resume_from_checkpoint=False)
 
 # Training Settings =============================
 parser.add_argument('--lr', type=float, default=2e-4, help='Input learning rate for ADAM optimizer')
@@ -68,17 +74,16 @@ x_transfer_features = get_transfer_features(args=opt)
 # plt.show()
 
 ngpus = torch.cuda.device_count()
-opt.start_from_checkpoint = False
 opt.num_ftrs = x_transfer_features.drop(['Image'], axis = 1).shape[1]
 
 #ngpus = 0 # uncomment this value and comment the above to force cpu usage in case of unsupported CUDA version on your GPU - this is sadly the simplest solution
-if opt.start_from_checkpoint:
-  print('loading from last checkpoint... ./cp/stl10/checkpoint.pth_20210511-0742.tar')
+if opt.resume_from_checkpoint:
   list_of_files = glob.glob('./cp/' + opt.dataset_name + '/*') # * means all if need specific format then *.csv
   print('./cp/' + opt.dataset_name + '/*')
-  print(list_of_files)
   latest_file = max(list_of_files, key=os.path.getctime)
-  sd_mdl = torch.load('./cp/stl10/checkpoint.pth_20210511-0742.tar')
+  print('loading from last checkpoint: ' + str(latest_file))
+
+  sd_mdl = torch.load(latest_file)
 
   rkm = RKM_Stiefel_Transfer(ipVec_dim=ipVec_dim, args=opt, nChannels=nChannels, ngpus=ngpus).to(device)
   rkm.load_state_dict(sd_mdl['rkm_state_dict'])
