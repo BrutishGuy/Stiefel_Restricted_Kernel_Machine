@@ -136,7 +136,7 @@ class RKM_Stiefel_Transfer(nn.Module):
         self.args.x_fdim1 = latent_dim
         self.args.x_fdim2 = latent_dim
         self.args.loss= 'splitloss'
-        self.args.h_dim= 128
+        self.args.h_dim= 256
         self.args.noise_level= 1e-3
         self.args.proc= 'cuda'
         self.args.c_accu= 1
