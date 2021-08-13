@@ -155,7 +155,7 @@ def get_cifar10_subset_dataloader(args, path_to_data='./data/cifar10'):
           
     subset_indices = dog_indices + cat_indices + bird_indices + horse_indices
     subset_indices = torch.tensor(subset_indices)
-    subsetting_choice = subset_indices[torch.randperm(len(subset_indices))[:2000]]
+    subsetting_choice = subset_indices[torch.randperm(len(subset_indices))[:1000]]
 
 
     cifar10_dataset_subset = SubsetRandomSampler(subsetting_choice)
