@@ -83,8 +83,8 @@ if opt.resume_from_checkpoint:
 
   sd_mdl = torch.load(latest_file)
 
-  rkm = RKM_Stiefel_Transfer(ipVec_dim=ipVec_dim, args=opt, nChannels=nChannels, ngpus=ngpus).to(device)
-  rkm.load_state_dict(sd_mdl['rkm_state_dict'])
+  rkm = RKM_Stiefel_Transfer(base_channel_size=32, latent_dim=256).to(device)
+  rkm.load_state_dict(sd_mdl['state_dict'])
   param_g, param_e1 = param_state(rkm)
 
   t = sd_mdl['epochs']
@@ -97,8 +97,11 @@ if opt.resume_from_checkpoint:
   cost = Loss_stk[-1][0]
   l_cost = Loss_stk[-1][0]
 else:
-  rkm = RKM_Stiefel_Transfer.load_from_checkpoint('./out/cifar10/cifar10_256.ckpt').to_device(0)
-
+  #rkm = RKM_Stiefel_Transfer.load_from_checkpoint('./out/cifar10/cifar10_256.ckpt').to_device(0)
+  sd_mdl = torch.load('../out/cifar10/cifar10_256.ckpt')
+  rkm = RKM_Stiefel_Transfer(base_channel_size=32, latent_dim=256).to(device)
+  rkm.load_state_dict(sd_mdl['state_dict'])
+  
   rkm._reset_manifold_param()
   rkm._freeze_decoder_weights()
   rkm._freeze_encoder_weights()
@@ -120,6 +123,12 @@ logging.info('We are using {} GPU(s)!'.format(ngpus))
 # Train =========================================================================================================
 start = datetime.now()
 is_best = False
+
+#trainer = pl.Trainer(default_root_dir=os.path.join(CHECKPOINT_PATH, "cifar10_%i" % latent_dim),
+#                         gpus=1 if str(device).startswith("cuda") else 0,
+#                         max_epochs=500,
+#                         callbacks=[ModelCheckpoint(save_weights_only=True),
+#                                    LearningRateMonitor("epoch")])
 
 while cost > 1e-10 and t <= opt.max_epochs:  # run epochs until convergence or cut-off
     avg_loss, avg_f1, avg_f2 = 0, 0, 0
