@@ -97,7 +97,7 @@ if opt.resume_from_checkpoint:
   cost = Loss_stk[-1][0]
   l_cost = Loss_stk[-1][0]
 else:
-  rkm = RKM_Stiefel_Transfer.load_from_checkpoint('../out/cifar10/cifar10_256.ckpt')
+  rkm = RKM_Stiefel_Transfer.load_from_checkpoint('./out/cifar10/cifar10_256.ckpt')
 
   rkm._reset_manifold_param()
   rkm._freeze_decoder_weights()
