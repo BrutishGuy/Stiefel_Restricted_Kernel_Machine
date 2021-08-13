@@ -406,10 +406,12 @@ class CIFAR10Dataset(Dataset):
         transforms.CenterCrop(32),
         #transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(
-        mean=[0.4914, 0.4822, 0.4465],
-        std=[0.2023, 0.1994, 0.2010]
-        )])
+        transforms.Normalize((0.5,),(0.5,))
+        #transforms.Normalize(
+        #mean=[0.4914, 0.4822, 0.4465],
+        #std=[0.2023, 0.1994, 0.2010]
+        #)
+            ])
         self.cifar_images = datasets.CIFAR10(root=path_to_data + '/cifar10/train/', train=True , download=True, transform=self.all_transforms ) 
     def __getitem__(self, index):
         data, target = self.cifar_images[index]        
