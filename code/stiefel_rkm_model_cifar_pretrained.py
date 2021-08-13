@@ -116,7 +116,7 @@ class Decoder(nn.Module):
         return x
     
     
-class RKM_Stiefel_Transfer(pl.LightningModule):
+class RKM_Stiefel_Transfer(nn.Module):
     """ Defines the Stiefel RKM model and its loss functions """
     def __init__(self, 
                  base_channel_size: int,
@@ -150,7 +150,7 @@ class RKM_Stiefel_Transfer(pl.LightningModule):
         self.base_channel_size = base_channel_size
         
         
-        self.save_hyperparameters()
+        #self.save_hyperparameters()
         self.encoder = encoder_class(num_input_channels, base_channel_size, latent_dim)
         self.decoder = decoder_class(num_input_channels, base_channel_size, latent_dim)
 
@@ -195,7 +195,6 @@ class RKM_Stiefel_Transfer(pl.LightningModule):
                                             self.manifold_param))
             f2 = self.args.c_accu * 0.5 * (
                 self.recon_loss(x_tilde.view(-1, self.ipVec_dim), x.view(-1, self.ipVec_dim))) / x.size(0)  # Recons_loss
-
         elif self.args.loss == 'deterministic':
             x_tilde = self.decoder(torch.mm(op1, torch.mm(self.manifold_param.t(), self.manifold_param)))
             f2 = self.args.c_accu * 0.5 * (self.recon_loss(x_tilde.view(-1, self.ipVec_dim), x.view(-1, self.ipVec_dim)))/x.size(0)  # Recons_loss

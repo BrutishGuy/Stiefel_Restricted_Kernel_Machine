@@ -99,12 +99,13 @@ if opt.resume_from_checkpoint:
 else:
   #rkm = RKM_Stiefel_Transfer.load_from_checkpoint('./out/cifar10/cifar10_256.ckpt').to_device(0)
   sd_mdl = torch.load('./out/cifar10/cifar10_256.ckpt')
-  rkm = RKM_Stiefel_Transfer(base_channel_size=32, latent_dim=256).to(device)
+  rkm = RKM_Stiefel_Transfer(base_channel_size=32, latent_dim=256)
   rkm.load_state_dict(sd_mdl['state_dict'])
   
   rkm._reset_manifold_param()
   rkm._freeze_decoder_weights()
   rkm._freeze_encoder_weights()
+  rkm.to(device)
   # Accumulate trainable parameters in 2 groups:
   # 1. Manifold_params 2. Network params
   param_g, param_e1 = param_state(rkm)
