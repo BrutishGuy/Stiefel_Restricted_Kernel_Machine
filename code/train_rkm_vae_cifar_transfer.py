@@ -36,7 +36,7 @@ parser.add_argument('--lr', type=float, default=2e-4, help='Input learning rate 
 parser.add_argument('--lrg', type=float, default=1e-4, help='Input learning rate for Cayley_ADAM optimizer')
 parser.add_argument('--max_epochs', type=int, default=1000, help='Input max_epoch')
 parser.add_argument('--proc', type=str, default='cuda', help='device type: cuda or cpu')
-parser.add_argument('--workers', type=int, default=4, help='Number of workers for dataloader')
+parser.add_argument('--workers', type=int, default=1, help='Number of workers for dataloader')
 parser.add_argument('--shuffle', type=bool, default=True, help='shuffle dataset: True/False')
 
 opt = parser.parse_args()
@@ -73,7 +73,7 @@ xtrain, ipVec_dim, nChannels = get_dataloader(args=opt)
 # plt.show()
 
 ngpus = torch.cuda.device_count()
-
+print(device)
 #ngpus = 0 # uncomment this value and comment the above to force cpu usage in case of unsupported CUDA version on your GPU - this is sadly the simplest solution
 if opt.resume_from_checkpoint:
   list_of_files = glob.glob('./cp/' + opt.dataset_name + '/*') # * means all if need specific format then *.csv
