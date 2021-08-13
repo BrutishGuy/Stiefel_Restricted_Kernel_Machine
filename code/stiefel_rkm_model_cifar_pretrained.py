@@ -138,7 +138,7 @@ class RKM_Stiefel_Transfer(nn.Module):
         self.args.loss= 'splitloss'
         self.args.h_dim= 128
         self.args.noise_level= 1e-3
-        self.args.proc= 'cpu'
+        self.args.proc= 'cuda'
         self.args.c_accu= 1
         self.args.shuffle= False
         self.num_input_channels = num_input_channels
