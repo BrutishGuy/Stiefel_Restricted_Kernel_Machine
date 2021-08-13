@@ -77,7 +77,7 @@ ngpus = torch.cuda.device_count()
 #ngpus = 0 # uncomment this value and comment the above to force cpu usage in case of unsupported CUDA version on your GPU - this is sadly the simplest solution
 if opt.resume_from_checkpoint:
   list_of_files = glob.glob('./cp/' + opt.dataset_name + '/*') # * means all if need specific format then *.csv
-  print('./cp/' + opt.dataset_name + '/*')
+  print('cp/' + opt.dataset_name + '/*')
   latest_file = max(list_of_files, key=os.path.getctime)
   print('loading from last checkpoint: ' + str(latest_file))
 
@@ -97,7 +97,7 @@ if opt.resume_from_checkpoint:
   cost = Loss_stk[-1][0]
   l_cost = Loss_stk[-1][0]
 else:
-  rkm = RKM_Stiefel_Transfer.load_from_checkpoint('./out/cifar10/cifar10_256.ckpt')
+  rkm = RKM_Stiefel_Transfer.load_from_checkpoint('out/cifar10/cifar10_256.ckpt')
 
   rkm._reset_manifold_param()
   rkm._freeze_decoder_weights()
