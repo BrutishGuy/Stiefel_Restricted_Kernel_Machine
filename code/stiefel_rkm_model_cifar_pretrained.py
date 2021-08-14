@@ -153,7 +153,16 @@ class RKM_Stiefel_Transfer(nn.Module):
         #self.save_hyperparameters()
         self.encoder = encoder_class(num_input_channels, base_channel_size, latent_dim)
         self.decoder = decoder_class(num_input_channels, base_channel_size, latent_dim)
-
+        
+        self.encoder_extra_layer = nn.Sequential(
+            nn.GELU(),
+            nn.Linear(latent_dim, latent_dim//2),
+        )
+        self.decoder_extra_layer = nn.Sequential(
+            nn.Linear(latent_dim//2, latent_dim),
+            nn.GELU()
+        )
+        
     def _set_args(self, args):
         self.args = args
         self.manifold_param = nn.Parameter(nn.init.orthogonal_(torch.Tensor(self.args.h_dim, self.args.x_fdim2)))
@@ -175,15 +184,16 @@ class RKM_Stiefel_Transfer(nn.Module):
     
     def forward(self, x):
         op1 = self.encoder(x)  # features
+        op1 = self.encoder_extra_layer(op1)
         op1 = op1 - torch.mean(op1, dim=0)  # feature centering
         C = torch.mm(op1.t(), op1)  # Covariance matrix
 
         """ Various types of losses as described in paper """
         if self.args.loss == 'splitloss':
-            x_tilde1 = self.decoder(torch.mm(torch.mm(op1, self.manifold_param.t())
+            x_tilde1 = self.decoder(self.decoder_extra_layer(torch.mm(torch.mm(op1, self.manifold_param.t())
                                             + self.args.noise_level * torch.randn((x.shape[0], self.args.h_dim)).to(self.args.proc),
-                                            self.manifold_param))
-            x_tilde2 = self.decoder(torch.mm(torch.mm(op1, self.manifold_param.t()), self.manifold_param))
+                                            self.manifold_param)))
+            x_tilde2 = self.decoder(self.decoder_extra_layer(torch.mm(torch.mm(op1, self.manifold_param.t()), self.manifold_param)))
             f2 = self.args.c_accu * 0.5 * (
                     self.recon_loss(x_tilde2.view(-1, self.ipVec_dim), x.view(-1, self.ipVec_dim))
                     + self.recon_loss(x_tilde2.view(-1, self.ipVec_dim),
