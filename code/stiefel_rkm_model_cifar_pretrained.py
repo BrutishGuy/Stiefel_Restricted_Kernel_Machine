@@ -134,7 +134,7 @@ class RKM_Stiefel_Transfer(nn.Module):
         self.args = argparse.Namespace()
         self.args.capacity = base_channel_size
         self.args.x_fdim1 = latent_dim
-        self.args.x_fdim2 = latent_dim
+        self.args.x_fdim2 = latent_dim//2
         self.args.loss= 'splitloss'
         self.args.h_dim= 64
         self.args.noise_level= 1e-3
