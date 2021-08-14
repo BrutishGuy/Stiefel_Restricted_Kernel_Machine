@@ -177,7 +177,7 @@ with torch.no_grad():
             # computation
             yop = lambd[0] * y1 + lambd[1] * y2 + lambd[2] * y3 + lambd[3] * y4
             yop = torch.FloatTensor(yop)
-            x_gen = rkm.decoder(torch.mv(U, yop)).detach().cpu().numpy().reshape( nChannels, WH, WH)
+            x_gen = rkm.decoder(torch.unsqueeze(torch.mv(U, yop), 0)).detach().cpu().numpy().reshape( nChannels, WH, WH)
     
             ax[i, j].imshow(convert_to_imshow_format(x_gen))
             ax[i, j].set_xticks([])
