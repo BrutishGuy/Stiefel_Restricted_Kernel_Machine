@@ -100,7 +100,7 @@ else:
   #rkm = RKM_Stiefel_Transfer.load_from_checkpoint('./out/cifar10/cifar10_256.ckpt').to_device(0)
   sd_mdl = torch.load('./out/cifar10/cifar10_256.ckpt')
   rkm = RKM_Stiefel_Transfer(base_channel_size=32, latent_dim=256)
-  rkm.load_state_dict(sd_mdl['state_dict'])
+  rkm.load_state_dict(sd_mdl['state_dict'], strict=False)
   
   rkm._reset_manifold_param()
   rkm._freeze_decoder_weights()
@@ -111,7 +111,7 @@ else:
   param_g, param_e1 = param_state(rkm)
 
   optimizer1 = stiefel_opti(param_g, opt.lrg)
-  #optimizer2 = torch.optim.Adam(param_e1, lr=opt.lr, weight_decay=0)
+  optimizer2 = torch.optim.Adam(param_e1, lr=opt.lr, weight_decay=0)
   Loss_stk = np.empty(shape=[0, 3])
   cost, l_cost = np.inf, np.inf  # Initialize cost
   t = 1
@@ -140,9 +140,9 @@ while cost > 1e-10 and t <= opt.max_epochs:  # run epochs until convergence or c
         
 
         optimizer1.zero_grad()
-        #optimizer2.zero_grad()
+        optimizer2.zero_grad()
         loss.backward()
-        #optimizer2.step()
+        optimizer2.step()
         optimizer1.step()
 
         avg_loss += loss.item()
@@ -157,7 +157,7 @@ while cost > 1e-10 and t <= opt.max_epochs:  # run epochs until convergence or c
         'epochs': t,
         'rkm_state_dict': rkm.state_dict(),
         'optimizer1': optimizer1.state_dict(),
-        #'optimizer2': optimizer2.state_dict(),
+        'optimizer2': optimizer2.state_dict(),
         'Loss_stk': Loss_stk,
     }, is_best)
 
@@ -181,7 +181,7 @@ logging.info("\nTraining complete in: " + str(datetime.now() - start))
 torch.save({'rkm': rkm,
             'rkm_state_dict': rkm.state_dict(),
             'optimizer1': optimizer1.state_dict(),
-            #'optimizer2': optimizer2.state_dict(),
+            'optimizer2': optimizer2.state_dict(),
             'Loss_stk': Loss_stk,
             'opt': opt,
             'h': h, 'U': U}, 'out/{}/{}'.format(opt.dataset_name, dirs.dirout))
