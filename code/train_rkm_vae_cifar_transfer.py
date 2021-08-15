@@ -83,16 +83,16 @@ if opt.resume_from_checkpoint:
 
   sd_mdl = torch.load(latest_file)
 
-  rkm = RKM_Stiefel_Transfer(base_channel_size=32, latent_dim=256).to(device)
-  rkm.load_state_dict(sd_mdl['state_dict'])
+  rkm = RKM_Stiefel_Transfer(base_channel_size=32, latent_dim=64).to(device)
+  rkm.load_state_dict(sd_mdl['rkm_state_dict'])
   param_g, param_e1 = param_state(rkm)
 
   t = sd_mdl['epochs']
   optimizer1 = stiefel_opti(param_g, opt.lrg)
-  #optimizer2 = torch.optim.Adam(param_e1, lr=opt.lr, weight_decay=0)
+  optimizer2 = torch.optim.Adam(param_e1, lr=opt.lr, weight_decay=0)
 
   optimizer1.load_state_dict(sd_mdl['optimizer1'])
-  #optimizer2.load_state_dict(sd_mdl['optimizer2'])
+  optimizer2.load_state_dict(sd_mdl['optimizer2'])
   Loss_stk = sd_mdl['Loss_stk']
   cost = Loss_stk[-1][0]
   l_cost = Loss_stk[-1][0]
