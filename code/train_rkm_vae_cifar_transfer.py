@@ -27,7 +27,8 @@ parser.add_argument('--no_transfer_learning', dest='use_transfer_learning', acti
 parser.add_argument('--transfer_learning_arch', type=str, default='resnet50', help='pre-trained architecture to use: one of those available in torchvision.models, e.g.) resnet50, resnet152, inception_v3, vgg19, etc.')
 parser.add_argument('--use_checkpoint', dest='resume_from_checkpoint', action='store_true', help='Start from checkpoint in case of crash or other early termination, i.e. continue training.')
 parser.add_argument('--no_use_checkpoint', dest='resume_from_checkpoint', action='store_false', help='Do not start from checkpoint, i.e. start from scratch.')
-
+parser.add_argument('--checkpoint_path', type=str, default='mnist', help='Sub-folder within in ./cp/ directory which contains the checkpoints from the runs.')
+s
 parser.set_defaults(use_transfer_learning=False)
 parser.set_defaults(resume_from_checkpoint=False)
 
