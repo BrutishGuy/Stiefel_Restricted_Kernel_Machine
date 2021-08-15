@@ -238,7 +238,7 @@ def final_compute(model, args, ct, device=torch.device('cuda')):
 
     # Compute feature-vectors
     for i, sample_batch in enumerate(tqdm(x)):
-        torch.save({'oti': model.encoder(sample_batch[0].to(device))},
+        torch.save({'oti': model.encoder_extra_layer(model.encoder(sample_batch[0].to(device)))},
                    'oti/oti{}_checkpoint.pth_{}.tar'.format(i, ct))
 
     # Load feature-vectors
