@@ -249,7 +249,10 @@ def final_compute(model, args, ct, device=torch.device('cuda')):
 
     ot = (ot - torch.mean(ot, dim=0)).to(device)  # Centering
     u, _, _ = torch.svd(torch.mm(ot.t(), ot))
+    print(u.size())
     u = u[:, :args.h_dim]
+    print(u.size())
+    print(model.manifold_param.size())
     with torch.no_grad():
         model.manifold_param.masked_scatter_(model.manifold_param != u.t(), u.t())
     return torch.mm(ot, u.to(device)), u
